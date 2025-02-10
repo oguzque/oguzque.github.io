@@ -1,10 +1,168 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>PDF Görüntüleyici</title>
-</head>
-<body>
-    <h1>PDF Görüntüleyici</h1>
-    <embed src="workinfo.pdf" type="application/pdf" width="100%" height="600px" />
-</body>
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>BrotherBanks</title>
+    <style>
+      :root {
+        --gap-size: 32px;
+        box-sizing: border-box;
+        font-family: -apple-system, BlinkMacSystemFont, 'Trebuchet MS', Roboto, Ubuntu, sans-serif;
+        color: #000;
+      }
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      body {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        background: #fff;
+      }
+      header,
+      footer {
+        display: flex;
+        width: 100%;
+        align-items: center;
+        background: rgba(0, 0, 0, 0.05);
+        gap: 12px;
+        padding: var(--gap-size);
+      }
+      header {
+        justify-content: space-between;
+        box-shadow: rgba(0, 0, 0, 0.05) 0 2px 6px 0;
+        z-index: 1;
+      }
+      header #site-logo {
+        font-weight: 800;
+        font-size: 32px;
+        padding: 16px;
+        background: var(--18-promo-gradient-02, linear-gradient(90deg, #ff0062 0%, #000000 100%));
+        -webkit-text-fill-color: transparent;
+        -webkit-background-clip: text;
+        background-clip: text;
+      }
+      #buyButton {
+        padding: 10px 20px;
+        font-size: 16px;
+        background: #ff0062;
+        color: #fff;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        transition: background 0.3s;
+      }
+      #buyButton:hover {
+        background: #d40050;
+      }
+      main {
+        display: grid;
+        width: 100%;
+        padding: 0 calc(var(--gap-size) * 0.5);
+        max-width: 1200px;
+        grid-template-columns: 1fr 1fr;
+        grid-gap: var(--gap-size);
+      }
+      .span-full-grid,
+      #symbol-info,
+      #advanced-chart,
+      #company-profile,
+      #fundamental-data {
+        grid-column: span 2;
+      }
+      .span-one-column,
+      #technical-analysis,
+      #top-stories,
+      #powered-by-tv {
+        grid-column: span 1;
+      }
+      #ticker-tape {
+        width: 100%;
+        margin-bottom: var(--gap-size);
+      }
+      #advanced-chart {
+        height: 500px;
+      }
+      #company-profile {
+        height: 390px;
+      }
+      #fundamental-data {
+        height: 490px;
+      }
+      #technical-analysis,
+      #top-stories {
+        height: 425px;
+      }
+      #powered-by-tv {
+        display: flex;
+        background: #f8f9fd;
+        border: solid 1px #e0e3eb;
+        text-align: justify;
+        flex-direction: column;
+        gap: 8px;
+        font-size: 14px;
+        padding: 16px;
+        border-radius: 6px;
+      }
+      #powered-by-tv a,
+      #powered-by-tv a:visited {
+        color: #2962ff;
+      }
+      @media (max-width: 1200px) {
+        main > section,
+        .span-full-grid,
+        #technical-analysis,
+        #top-stories,
+        #powered-by-tv {
+          grid-column: span 2;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <a id="site-logo" href="#">BrotherBanks</a>
+    </header>
+
+    <main>
+      <section id="advanced-chart">
+        <!-- TradingView Widget BEGIN -->
+        <div class="tradingview-widget-container" style="height:100%;width:100%">
+          <div class="tradingview-widget-container__widget" style="height:calc(80% - 32px);width:100%"></div>
+          <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-advanced-chart.js" async>
+          {
+            "autosize": true,
+            "symbol": "XRPUSDT.P",
+            "interval": "5",
+            "timezone": "Etc/UTC",
+            "theme": "light",
+            "style": "1",
+            "locale": "tr",
+            "allow_symbol_change": true,
+            "calendar": false,
+            "support_host": "https://www.tradingview.com"
+          }
+          </script>
+        </div>
+        <!-- TradingView Widget END -->
+      </section>
+      <section id="powered-by-tv">
+        <!-- Ek içerik buraya eklenebilir -->
+      </section>
+    </main>
+
+    <!-- En alt kısımda, butona tıklayınca yönlendirme yapacak buton -->
+    <footer>
+      <button id="buyButton">Binance'de XRPUSDT.P Al</button>
+    </footer>
+
+    <script>
+      document.getElementById("buyButton").addEventListener("click", function() {
+        window.location.href = "https://www.binance.com/en/futures/XRPUSDT";
+      });
+    </script>
+  </body>
 </html>
