@@ -1,0 +1,147 @@
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title>XRPUSDT Chart</title>
+    <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
+    <style>
+      body { background-color:#121212; color:white; font-family:Arial, sans-serif; text-align:center; padding:20px; }
+      #tradingview_123 { height:600px; }
+      input, button { font-family: Arial, sans-serif; }
+      .copy-btn { margin-left: 8px; padding: 6px 12px; background: #2196F3; color: #fff; border: none; border-radius: 4px; cursor: pointer; }
+      .section { margin-top: 30px; }
+      .input-group { display: inline-flex; align-items: center; margin-right: 10px; }
+    </style>
+  </head>
+  <body>
+
+    <!-- TradingView Grafiği -->
+    <div id="tradingview_123"></div>
+    <script type="text/javascript">
+      new TradingView.widget({
+        "autosize": true,
+        "symbol": "BINANCE:XRPUSDT.P",
+        "interval": "3",
+        "timezone": "Etc/UTC",
+        "theme": "dark",
+        "style": "1",
+        "locale": "tr",
+        "toolbar_bg": "#f1f3f6",
+        "enable_publishing": false,
+        "withdateranges": true,
+        "hide_side_toolbar": false,
+        "allow_symbol_change": true,
+        "container_id": "tradingview_123",
+        "studies": [],
+        "drawings_access": {
+          "type": "black",
+          "tools": [
+            { "name": "trend_line" },
+            { "name": "horizontal_line" },
+            { "name": "fib_retracement" }
+          ]
+        }
+      });
+    </script>
+
+    <!-- Al ve Sat Butonları -->
+    <div class="section">
+      <a href="https://www.binance.com/en/futures/XRPUSDT?side=BUY" target="_blank" style="margin-right:10px;">
+        <button style="padding:10px 20px; background:#f0b90b; color:#000; border:none; border-radius:6px; cursor:pointer;">
+          Binance'de XRPUSDT Al (Vadeli)
+        </button>
+      </a>
+      <a href="https://www.binance.com/en/futures/XRPUSDT?side=SELL" target="_blank">
+        <button style="padding:10px 20px; background:#e84142; color:#fff; border:none; border-radius:6px; cursor:pointer;">
+          Binance'de XRPUSDT Sat (Vadeli)
+        </button>
+      </a>
+    </div>
+
+    <!-- Long Stoploss Hesaplayıcı -->
+    <div id="long-section" class="section">
+      <h3>Long Stoploss Hesaplayıcı</h3>
+      <span class="input-group">
+        <input id="long-entry-price" type="number" placeholder="Long giriş fiyatı" step="any" style="padding:8px; width:160px; border-radius:4px; border:1px solid #555; background:#222; color:#fff;">
+        <button id="long-copy-entry" class="copy-btn" title="Giriş fiyatını kopyala">↪</button>
+      </span>
+      <span class="input-group">
+        <input id="long-stoploss-percent" type="number" placeholder="Stoploss %" step="any" value="3" style="padding:8px; width:160px; border-radius:4px; border:1px solid #555; background:#222; color:#fff;">
+      </span>
+      <button id="long-calc-btn" style="padding:8px 16px; background:#4caf50; color:#fff; border:none; border-radius:4px; cursor:pointer;">
+        Hesapla
+      </button>
+      <button id="long-copy-btn" class="copy-btn">
+        Kopyala
+      </button>
+      <div id="long-result" style="margin-top:15px; font-size:16px;"></div>
+    </div>
+
+    <!-- Short Stoploss Hesaplayıcı -->
+    <div id="short-section" class="section">
+      <h3>Short Stoploss Hesaplayıcı</h3>
+      <span class="input-group">
+        <input id="short-entry-price" type="number" placeholder="Short giriş fiyatı" step="any" style="padding:8px; width:160px; border-radius:4px; border:1px solid #555; background:#222; color:#fff;">
+        <button id="short-copy-entry" class="copy-btn" title="Giriş fiyatını kopyala">↪</button>
+      </span>
+      <span class="input-group">
+        <input id="short-stoploss-percent" type="number" placeholder="Stoploss %" step="any" value="3" style="padding:8px; width:160px; border-radius:4px; border:1px solid #555; background:#222; color:#fff;">
+      </span>
+      <button id="short-calc-btn" style="padding:8px 16px; background:#4caf50; color:#fff; border:none; border-radius:4px; cursor:pointer;">
+        Hesapla
+      </button>
+      <button id="short-copy-btn" class="copy-btn">
+        Kopyala
+      </button>
+      <div id="short-result" style="margin-top:15px; font-size:16px;"></div>
+    </div>
+
+    <script>
+      // Long hesaplama ve kopyalama işlevleri
+      let lastLongSL = '';
+      document.getElementById('long-copy-entry').addEventListener('click', function() {
+        const entryVal = document.getElementById('long-entry-price').value;
+        if (entryVal) navigator.clipboard.writeText(entryVal);
+      });
+      document.getElementById('long-calc-btn').addEventListener('click', function() {
+        const entry = parseFloat(document.getElementById('long-entry-price').value);
+        const percent = parseFloat(document.getElementById('long-stoploss-percent').value);
+        const resultEl = document.getElementById('long-result');
+        if (isNaN(entry) || isNaN(percent)) {
+          resultEl.innerText = 'Lütfen geçerli değerler girin.';
+          return;
+        }
+        const slPrice = entry * (1 - percent / 100);
+        lastLongSL = slPrice.toFixed(8);
+        resultEl.innerText = 'Long Stoploss seviyesi: ' + lastLongSL;
+      });
+      document.getElementById('long-copy-btn').addEventListener('click', function() {
+        if (lastLongSL) navigator.clipboard.writeText(lastLongSL);
+      });
+
+      // Short hesaplama ve kopyalama işlevleri
+      let lastShortSL = '';
+      document.getElementById('short-copy-entry').addEventListener('click', function() {
+        const entryVal = document.getElementById('short-entry-price').value;
+        if (entryVal) navigator.clipboard.writeText(entryVal);
+      });
+      document.getElementById('short-calc-btn').addEventListener('click', function() {
+        const entry = parseFloat(document.getElementById('short-entry-price').value);
+        const percent = parseFloat(document.getElementById('short-stoploss-percent').value);
+        const resultEl = document.getElementById('short-result');
+        if (isNaN(entry) || isNaN(percent)) {
+          resultEl.innerText = 'Lütfen geçerli değerler girin.';
+          return;
+        }
+        const slPrice = entry * (1 + percent / 100);
+        lastShortSL = slPrice.toFixed(8);
+        resultEl.innerText = 'Short Stoploss seviyesi: ' + lastShortSL;
+      });
+      document.getElementById('short-copy-btn').addEventListener('click', function() {
+        if (lastShortSL) navigator.clipboard.writeText(lastShortSL);
+      });
+    </script>
+
+  </body>
+</html>
