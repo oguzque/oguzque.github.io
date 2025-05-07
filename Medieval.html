@@ -17,24 +17,39 @@
       text-align: center;
     }
 
-    #tradingview_123 { height: 600px; }
+    #tradingview_123 {
+      margin: 0 auto;
+      width: 1200px;
+      height: 600px;
+    }
 
     .section {
       background-color: rgba(0, 0, 0, 0.6);
-      padding: 16px;
-      border-radius: 5px;
-      margin: 5px;
+      padding: 1px;
+      border-radius: 2px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .sl-section {
+      width: 100;
+      padding: 5px;
+      border-radius: 2px;
     }
 
     input, button {
       font-family: Arial, sans-serif;
-      width: 100%;
-      margin-bottom: 5px;
-      padding: 8px;
-      border-radius: 4px;
-      border: 1px solid #444;
+      width: 60%;
+      margin-bottom: 2px;
+      padding: 3px;
+      border-radius: 1px;
+      border: 1px solid #ffffff;
       background-color: #222;
-      color: white;
+      color: rgb(255, 255, 255);
+      text-align: center;
+      font-size: 14px;
     }
 
     button {
@@ -60,36 +75,57 @@
       background: #2196F3;
     }
 
-    iframe {
-      max-width: 100%;
-    }
-
-    .flex-container {
+    .bottom-left-container {
+      position: fixed;
+      bottom: 2px;
+      left: 2px;
+      z-index: 9999;
       display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-      align-items: flex-start;
-      gap: 10px;
-      margin-top: 1px;
+      flex-direction: column;
+      gap: 2px;
+      max-width: 260px;
     }
 
-    .small-box {
-      max-width: 250px;
-      flex: 1;
+    .small-btn {
+      width: 100px;
+      padding: 2px;
+      font-size: 14px;
     }
 
-    .youtube-box {
-      flex: 2;
-      max-width: 560px;
+    #news-container {
+      position: fixed;
+      top: 2px;
+      left: 2px;
+      z-index: 9999;
+      width: 300px;
+      max-height: 400px;
+      overflow-y: auto;
+      background: rgba(0, 0, 0, 0.7);
+      color: white;
+      font-size: 14px;
+      padding: 10px;
+      border-radius: 8px;
+    }
+
+    #news-container h4 {
+      margin: 0 0 10px 0;
+    }
+
+    #news-container ul {
+      list-style: disc;
+      padding-left: 18px;
     }
   </style>
 </head>
+
 <body>
+
   <!-- TradingView Grafiği -->
   <div id="tradingview_123"></div>
   <script type="text/javascript">
     new TradingView.widget({
-      "autosize": true,
+      "width": 1500,
+      "height": 900,
       "symbol": "BINANCE:XRPUSDT.P",
       "interval": "3",
       "timezone": "Etc/UTC",
@@ -104,20 +140,36 @@
       "container_id": "tradingview_123"
     });
   </script>
-  <!-- Alt Kısımdaki İçerikler Flex Kutusunda -->
-  <div class="flex-container">
-    <!-- Binance Al-Sat Butonları -->
-    <div class="section small-box">
+
+  <!-- Sol Üst Köşe - Kripto Haberleri -->
+  <div id="news-container">
+    <h4>🔔 Crypto News</h4>
+    <ul id="news-list"></ul>
+  </div>
+
+  <!-- Sol Alt Köşe İçerikler -->
+  <div class="bottom-left-container">
+    <!-- Radyo -->
+    <div style="background: rgba(0,0,0,0.7); padding: 10px; border-radius: 8px; display: flex; justify-content: left; align-items: center;">
+      <audio controls autoplay style="width: 100%;">
+        <source src="http://stream1.slowradio.com" type="audio/mpeg">
+        Tarayıcınız audio etiketini desteklemiyor.
+      </audio>
+    </div>
+
+    <!-- Binance İşlemleri -->
+    <div class="section">
       <h4>Binance İşlemleri</h4>
       <a href="https://www.binance.com/en/futures/XRPUSDT?side=BUY" target="_blank">
-        <button class="buy-btn">Long</button>
+        <button class="buy-btn small-btn">Long</button>
       </a>
       <a href="https://www.binance.com/en/futures/XRPUSDT?side=SELL" target="_blank">
-        <button class="sell-btn">Short</button>
+        <button class="sell-btn small-btn">Short</button>
       </a>
     </div>
-    <!-- Long Stoploss Hesaplayıcı -->
-    <div class="section small-box">
+
+    <!-- Long Stoploss -->
+    <div class="section sl-section">
       <h4>Long Stoploss</h4>
       <input id="long-entry-price" type="number" placeholder="Long giriş fiyatı" step="any">
       <input id="long-stoploss-percent" type="number" placeholder="Stoploss %" step="any" value="3">
@@ -125,8 +177,9 @@
       <button id="long-copy-btn" class="blue-btn">Kopyala</button>
       <div id="long-result" style="margin-top:8px;"></div>
     </div>
-<!-- Short Stoploss Hesaplayıcı -->
-    <div class="section small-box">
+
+    <!-- Short Stoploss -->
+    <div class="section sl-section">
       <h4>Short Stoploss</h4>
       <input id="short-entry-price" type="number" placeholder="Short giriş fiyatı" step="any">
       <input id="short-stoploss-percent" type="number" placeholder="Stoploss %" step="any" value="3">
@@ -134,13 +187,9 @@
       <button id="short-copy-btn" class="blue-btn">Kopyala</button>
       <div id="short-result" style="margin-top:8px;"></div>
     </div>
-
-    <!-- YouTube Video -->
-    <div class="section youtube-box">
-      <iframe width="560" height="300" src="https://www.youtube.com/embed/DBP_jVpvQWs?si=WzmSOHnKc1aWtAdQ" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-    </div>
   </div>
 
+  <!-- Hesaplama Scripti -->
   <script>
     let lastLongSL = '';
     document.getElementById('long-calc-btn').addEventListener('click', function () {
@@ -155,9 +204,11 @@
       lastLongSL = sl.toFixed(8);
       resultEl.innerText = 'Long Stoploss: ' + lastLongSL;
     });
+
     document.getElementById('long-copy-btn').addEventListener('click', function () {
       if (lastLongSL) navigator.clipboard.writeText(lastLongSL);
     });
+
     let lastShortSL = '';
     document.getElementById('short-calc-btn').addEventListener('click', function () {
       const entry = parseFloat(document.getElementById('short-entry-price').value);
@@ -171,9 +222,33 @@
       lastShortSL = sl.toFixed(8);
       resultEl.innerText = 'Short Stoploss: ' + lastShortSL;
     });
+
     document.getElementById('short-copy-btn').addEventListener('click', function () {
       if (lastShortSL) navigator.clipboard.writeText(lastShortSL);
     });
+
+    // Kripto Haberlerini Yükle
+    async function loadNews() {
+      const proxy = 'https://api.allorigins.win/get?url=';
+      const rssUrl = encodeURIComponent('https://cryptopanic.com/api/posts/?auth_token=demo&public=true');
+      try {
+        const res = await fetch(proxy + rssUrl);
+        const data = await res.json();
+        const json = JSON.parse(data.contents);
+        const newsList = document.getElementById("news-list");
+        newsList.innerHTML = "";
+        json.results.slice(0, 5).forEach(item => {
+          const li = document.createElement("li");
+          li.innerHTML = `<a href="${item.url}" target="_blank" style="color:#f0b90b; text-decoration:none;">${item.title}</a>`;
+          newsList.appendChild(li);
+        });
+      } catch (e) {
+        document.getElementById("news-list").innerHTML = "<li>Haberler yüklenemedi.</li>";
+      }
+    }
+
+    loadNews();
+    setInterval(loadNews, 10000); // her 60 saniyede yenile
   </script>
 
 </body>
