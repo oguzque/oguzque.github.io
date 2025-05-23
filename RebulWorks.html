@@ -20,80 +20,87 @@
       font-family: 'Segoe UI', sans-serif;
       background: var(--light-bg);
       color: var(--dark-text);
-      padding: 2rem;
+      margin: 0;
+      padding: var(--spacing);
     }
-    h1 { text-align: center; margin-bottom: 1.5rem; color: var(--primary); }
+    h1 { text-align: center; margin-bottom: var(--spacing); color: var(--primary); font-size: 1.5rem; }
     form {
       display: flex; flex-wrap: wrap; gap: var(--spacing);
-      margin-bottom: 1rem; background: var(--white);
+      margin-bottom: var(--spacing); background: var(--white);
       padding: var(--spacing); border-radius: var(--radius);
       box-shadow: 0 2px 6px rgba(0,0,0,0.1);
     }
     select, input {
-      flex: 1; min-width: 150px;
+      flex: 1 1 100%; min-width: 0;
       padding: var(--spacing);
       border: 1px solid #bdc3c7;
       border-radius: var(--radius);
       font-size: 1rem;
-      color: var(--dark-text);
       background: var(--white);
+      color: var(--dark-text);
     }
     button {
       padding: var(--spacing) 1.25rem;
       border: none; border-radius: var(--radius);
       background: var(--primary); color: var(--white);
       cursor: pointer; transition: background .2s;
+      font-size: 1rem;
     }
     button:hover { background: #1f2d3a; }
-    .controls { display: flex; gap: var(--spacing); margin-bottom: 1rem; }
-    .controls input[type=file] { flex: unset; }
-    #memberList { margin-bottom: 1rem; }
-    #memberList button { margin-right: 0.5rem; margin-bottom: 0.5rem; }
-    #memberTasks {
-      display: none;
-      position: relative;
+    #memberList { margin-bottom: var(--spacing); display: flex; flex-wrap: wrap; gap: calc(var(--spacing)/2); }
+    #memberList button {
+      flex: 1 1 auto;
+      padding: var(--spacing);
       background: var(--white);
-      padding: calc(var(--spacing) * 1.5) var(--spacing) var(--spacing);
+      border: 1px solid var(--primary);
+      border-radius: var(--radius);
+      color: var(--primary);
+      font-size: 0.9rem;
+    }
+    #memberTasks {
+      display: none; position: relative;
+      background: var(--white);
+      padding: calc(var(--spacing)*1.5);
       border-radius: var(--radius);
       box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-      margin-bottom: 1rem;
+      margin-bottom: var(--spacing);
     }
     #memberTasks button.close-btn {
-      position: absolute;
-      top: 0.5rem;
-      left: 0.5rem;
-      background: none;
-      border: none;
-      font-size: 1.25rem;
-      cursor: pointer;
+      position: absolute; top: var(--spacing); left: var(--spacing);
+      background: none; border: none;
+      font-size: 1.25rem; cursor: pointer;
       color: var(--dark-text);
     }
     table {
-      width: 100%; border-collapse: separate;
-      border-spacing: 0; background: var(--white);
-      border-radius: var(--radius); overflow: hidden;
+      width: 100%; border-collapse: collapse;
+      background: var(--white);
+      border-radius: var(--radius);
+      overflow: hidden;
       box-shadow: 0 2px 6px rgba(0,0,0,0.1);
     }
-    th, td { padding: var(--spacing); text-align: center; }
+    th, td {
+      padding: var(--spacing); text-align: center;
+      font-size: 0.9rem;
+    }
     thead th {
       background: var(--primary); color: var(--white); font-weight: 600;
     }
     tbody tr:nth-child(even) { background: #f7f9fa; }
-    tbody tr.started td {
-      background: var(--warning); color: var(--white);
-    }
-    tbody tr.completed td {
-      background: var(--success); color: var(--white);
-    }
+    tbody tr.started td { background: var(--warning); color: var(--white); }
+    tbody tr.completed td { background: var(--success); color: var(--white); }
     select.status-edit, select.name-edit {
-      border: 1px solid #bdc3c7;
-      border-radius: var(--radius);
-      padding: calc(var(--spacing) / 2);
-      background: var(--white);
-      color: var(--dark-text);
+      width: 100%; padding: calc(var(--spacing)/2);
+      border: 1px solid #bdc3c7; border-radius: var(--radius);
+      background: var(--white); color: var(--dark-text);
+      font-size: 0.9rem;
     }
     button.confirm-btn { background: var(--success); }
     button.delete-btn { background: #c0392b; }
+    @media (min-width: 600px) {
+      form select, form input { flex: 1; }
+      #memberList button { flex: none; }
+      th, td { font-size: 1rem; }
+    }
   </style>
 </head>
 <body>
@@ -113,11 +120,6 @@
     <input type="text" id="task" placeholder="Görev Girin" required maxlength="100" />
     <button type="submit">Ekle</button>
   </form>
-
-  <div class="controls">
-    <button id="exportBtn">İndir</button>
-    <input type="file" id="importFile" accept="application/json" />
-  </div>
 
   <div id="memberList"></div>
   <div id="memberTasks">
@@ -145,8 +147,6 @@
     const nameSelect = document.getElementById('name');
     const taskInput = document.getElementById('task');
     const listEl = document.getElementById('taskList');
-    const exportBtn = document.getElementById('exportBtn');
-    const importFile = document.getElementById('importFile');
     const memberList = document.getElementById('memberList');
     const memberTasks = document.getElementById('memberTasks');
     const memberTasksContent = document.getElementById('memberTasksContent');
@@ -160,8 +160,9 @@
       try {
         const res = await fetch(API_URL, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({to,subject,body}) });
         if(!res.ok) throw new Error('Mail gönderilemedi');
-      } catch (err) { console.error(err); alert('E-posta gönderimi sırasında hata oluştu'); }
+      } catch { alert('E-posta gönderimi sırasında hata oluştu'); }
     }
+
     function renderMemberButtons() {
       memberList.innerHTML = '';
       members.forEach(m => {
@@ -171,58 +172,54 @@
         memberList.appendChild(btn);
       });
     }
+
     function showMemberTasks(member) {
       const filtered = tasks.filter(t => t.name === member);
-      if (filtered.length === 0) {
-        memberTasksContent.innerHTML = `<p>${member}’e atanan görev yok.</p>`;
-      } else {
-        const items = filtered.map(t => `<li>${t.task} — ${t.status}</li>`).join('');
-        memberTasksContent.innerHTML = `<h3>${member}’in Görevleri:</h3><ul>${items}</ul>`;
-      }
+      memberTasksContent.innerHTML = filtered.length
+        ? `<h3>${member}’in Görevleri:</h3><ul>${filtered.map(t => `<li>${t.task} — ${t.status}</li>`).join('')}</ul>`
+        : `<p>${member}’e atanan görev yok.</p>`;
       memberTasks.style.display = 'block';
     }
+
     closeBtn.addEventListener('click', () => { memberTasks.style.display = 'none'; });
+
     function render() {
       listEl.innerHTML = '';
       const orderMap = { 'Başladı': 0, 'Atama Bekliyor': 1, 'Tamamlandı': 2 };
-      const sorted = tasks.slice().sort((a, b) => orderMap[a.status] - orderMap[b.status]);
-      sorted.forEach((t, i) => {
+      const sorted = tasks.slice().sort((a,b) => orderMap[a.status] - orderMap[b.status]);
+      sorted.forEach((t,i) => {
         const row = document.createElement('tr');
-        if (t.status === 'Başladı') row.classList.add('started');
-        if (t.status === 'Tamamlandı') row.classList.add('completed');
-        const nameOptions = members.map(m => `<option value="${m}" ${t.name===m?'selected':''}>${m}</option>`).join('');
+        if(t.status==='Başladı') row.classList.add('started');
+        if(t.status==='Tamamlandı') row.classList.add('completed');
+        const nameOpt = members.map(m => `<option value="${m}" ${t.name===m?'selected':''}>${m}</option>`).join('');
         row.innerHTML = `
           <td>${i+1}</td>
-          <td><select class="name-edit">${nameOptions}</select></td>
+          <td><select class="name-edit">${nameOpt}</select></td>
           <td>${t.task}</td>
-          <td>
-            <select class="status-edit">
+          <td><select class="status-edit">
               <option value="Atama Bekliyor" ${t.status==='Atama Bekliyor'?'selected':''}>Atama Bekliyor</option>
               <option value="Başladı" ${t.status==='Başladı'?'selected':''}>Başladı</option>
               <option value="Tamamlandı" ${t.status==='Tamamlandı'?'selected':''}>Tamamlandı</option>
-            </select>
-          </td>
+            </select></td>
           <td><button class="confirm-btn">Onayla</button></td>
           <td><button class="delete-btn">Sil</button></td>
         `;
-        row.querySelector('.name-edit').addEventListener('change', e => updateTask(t, 'name', e.target.value));
-        row.querySelector('.status-edit').addEventListener('change', e => updateTask(t, 'status', e.target.value));
+        row.querySelector('.name-edit').addEventListener('change', e => updateTask(t,'name',e.target.value));
+        row.querySelector('.status-edit').addEventListener('change', e => updateTask(t,'status',e.target.value));
         row.querySelector('.delete-btn').addEventListener('click', () => deleteTask(t));
         row.querySelector('.confirm-btn').addEventListener('click', async () => {
-          const to = emails[t.name];
-          const subject = 'Yeni Görev Atamanız';
-          const body = `Merhaba ${t.name},\n\nSana yeni bir görev atandı: ${t.task}.`;
-          await sendEmail(to, subject, body);
-          updateTask(t, 'status', 'Başladı');
+          await sendEmail(emails[t.name],'Yeni Görev Atamanız',`Merhaba ${t.name},\n\nSana yeni bir görev atandı: ${t.task}.`);
+          updateTask(t,'status','Başladı');
         });
         listEl.appendChild(row);
       });
     }
-    function updateTask(obj, key, val) { const idx = tasks.findIndex(t => t === obj); if (idx > -1) { tasks[idx][key] = val; save(); render(); }}
-    function deleteTask(obj) { tasks = tasks.filter(t => t !== obj); save(); render(); }
-    form.addEventListener('submit', e => { e.preventDefault(); const name = nameSelect.value, task = taskInput.value.trim(); if (!name || !task) return; tasks.push({ name, task, status: 'Atama Bekliyor' }); nameSelect.value = ''; taskInput.value = ''; save(); render(); });
-    exportBtn.addEventListener('click', () => { const dataStr = JSON.stringify(tasks, null, 2), blob = new Blob([dataStr], { type: 'application/json' }), url = URL.createObjectURL(blob), a = document.createElement('a'); a.href = url; a.download = 'tasks.json'; a.click(); URL.revokeObjectURL(url); });
-    importFile.addEventListener('change', e => { const file = e.target.files[0]; if (!file) return; const reader = new FileReader(); reader.onload = () => { try { tasks = JSON.parse(reader.result); save(); render(); } catch { alert('Geçersiz JSON dosyası'); } }; reader.readAsText(file); });
+
+    function updateTask(obj,key,val){const idx=tasks.findIndex(t=>t===obj);if(idx>-1){tasks[idx][key]=val;save();render();}}
+    function deleteTask(obj){tasks=tasks.filter(t=>t!==obj);save();render();}
+
+    form.addEventListener('submit', e=>{e.preventDefault();const name=nameSelect.value,task=taskInput.value.trim();if(!name||!task)return;tasks.push({name,task,status:'Atama Bekliyor'});nameSelect.value='';taskInput.value='';save();render();});
+
     renderMemberButtons(); render();
   </script>
 </body>
