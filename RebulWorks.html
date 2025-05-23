@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Takım Görev Takibi</title>
+  <style>
+    :root {
+      --primary: #2c3e50;
+      --success: #27ae60;
+      --warning: #f39c12;
+      --light-bg: #ecf0f1;
+      --dark-text: #2c3e50;
+      --white: #ffffff;
+      --radius: 8px;
+      --spacing: 0.75rem;
+    }
+    * { box-sizing: border-box; }
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: var(--light-bg);
+      color: var(--dark-text);
+      padding: 2rem;
+    }
+    h1 { text-align: center; margin-bottom: 1.5rem; color: var(--primary); }
+    form {
+      display: flex; flex-wrap: wrap; gap: var(--spacing);
+      margin-bottom: 1rem; background: var(--white);
+      padding: var(--spacing); border-radius: var(--radius);
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    }
+    select, input {
+      flex: 1; min-width: 150px;
+      padding: var(--spacing);
+      border: 1px solid #bdc3c7;
+      border-radius: var(--radius);
+      font-size: 1rem;
+      color: var(--dark-text);
+      background: var(--white);
+    }
+    button {
+      padding: var(--spacing) 1.25rem;
+      border: none; border-radius: var(--radius);
+      background: var(--primary); color: var(--white);
+      cursor: pointer; transition: background .2s;
+    }
+    button:hover { background: #1f2d3a; }
+    .controls { display: flex; gap: var(--spacing); margin-bottom: 1rem; }
+    .controls input[type=file] { flex: unset; }
+    #memberList { margin-bottom: 1rem; }
+    #memberList button { margin-right: 0.5rem; margin-bottom: 0.5rem; }
+    #memberTasks {
+      display: none;
+      position: relative;
+      background: var(--white);
+      padding: calc(var(--spacing) * 1.5) var(--spacing) var(--spacing);
+      border-radius: var(--radius);
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      margin-bottom: 1rem;
+    }
+    #memberTasks button.close-btn {
+      position: absolute;
+      top: 0.5rem;
+      left: 0.5rem;
+      background: none;
+      border: none;
+      font-size: 1.25rem;
+      cursor: pointer;
+      color: var(--dark-text);
+    }
+    table {
+      width: 100%; border-collapse: separate;
+      border-spacing: 0; background: var(--white);
+      border-radius: var(--radius); overflow: hidden;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    }
+    th, td { padding: var(--spacing); text-align: center; }
+    thead th {
+      background: var(--primary); color: var(--white); font-weight: 600;
+    }
+    tbody tr:nth-child(even) { background: #f7f9fa; }
+    tbody tr.started td {
+      background: var(--warning); color: var(--white);
+    }
+    tbody tr.completed td {
+      background: var(--success); color: var(--white);
+    }
+    select.status-edit, select.name-edit {
+      border: 1px solid #bdc3c7;
+      border-radius: var(--radius);
+      padding: calc(var(--spacing) / 2);
+      background: var(--white);
+      color: var(--dark-text);
+    }
+    button.confirm-btn { background: var(--success); }
+    button.delete-btn { background: #c0392b; }
+  </style>
+</head>
+<body>
+  <h1>REBUL PROJE YÖNETİMİ</h1>
+  <form id="taskForm">
+    <select id="name" required>
+      <option value="" disabled selected>Kişi Seçin</option>
+      <option>Oğuzhan</option>
+      <option>Ahmet</option>
+      <option>Onur</option>
+      <option>Ferhat</option>
+      <option>Berat</option>
+      <option>Osman</option>
+      <option>Serdar</option>
+      <option>Semih</option>
+    </select>
+    <input type="text" id="task" placeholder="Görev Girin" required maxlength="100" />
+    <button type="submit">Ekle</button>
+  </form>
+
+  <div class="controls">
+    <button id="exportBtn">İndir</button>
+    <input type="file" id="importFile" accept="application/json" />
+  </div>
+
+  <div id="memberList"></div>
+  <div id="memberTasks">
+    <button class="close-btn">×</button>
+    <div id="memberTasksContent"></div>
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>Yapacak Kişi</th>
+        <th>Görev</th>
+        <th>İşin Durumu</th>
+        <th>Mail At</th>
+        <th>Sil</th>
+      </tr>
+    </thead>
+    <tbody id="taskList"></tbody>
+  </table>
+
+  <script>
+    const API_URL = 'https://api.yourdomain.com/send-email';
+    const form = document.getElementById('taskForm');
+    const nameSelect = document.getElementById('name');
+    const taskInput = document.getElementById('task');
+    const listEl = document.getElementById('taskList');
+    const exportBtn = document.getElementById('exportBtn');
+    const importFile = document.getElementById('importFile');
+    const memberList = document.getElementById('memberList');
+    const memberTasks = document.getElementById('memberTasks');
+    const memberTasksContent = document.getElementById('memberTasksContent');
+    const closeBtn = document.querySelector('#memberTasks .close-btn');
+    const members = ['Oğuzhan','Ahmet','Onur','Ferhat','Berat','Osman','Serdar','Semih'];
+    const emails = { oğuzhan:'oguzhan@example.com',ahmet:'ahmet@example.com',onur:'onur@example.com',ferhat:'ferhat@example.com',berat:'berat@example.com',osman:'osman@example.com',serdar:'serdar@example.com',semih:'semih@example.com' };
+    let tasks = JSON.parse(localStorage.getItem('tasks') || '[]');
+
+    function save() { localStorage.setItem('tasks', JSON.stringify(tasks)); }
+    async function sendEmail(to, subject, body) {
+      try {
+        const res = await fetch(API_URL, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({to,subject,body}) });
+        if(!res.ok) throw new Error('Mail gönderilemedi');
+      } catch (err) { console.error(err); alert('E-posta gönderimi sırasında hata oluştu'); }
+    }
+    function renderMemberButtons() {
+      memberList.innerHTML = '';
+      members.forEach(m => {
+        const btn = document.createElement('button');
+        btn.textContent = m;
+        btn.addEventListener('click', () => showMemberTasks(m));
+        memberList.appendChild(btn);
+      });
+    }
+    function showMemberTasks(member) {
+      const filtered = tasks.filter(t => t.name === member);
+      if (filtered.length === 0) {
+        memberTasksContent.innerHTML = `<p>${member}’e atanan görev yok.</p>`;
+      } else {
+        const items = filtered.map(t => `<li>${t.task} — ${t.status}</li>`).join('');
+        memberTasksContent.innerHTML = `<h3>${member}’in Görevleri:</h3><ul>${items}</ul>`;
+      }
+      memberTasks.style.display = 'block';
+    }
+    closeBtn.addEventListener('click', () => { memberTasks.style.display = 'none'; });
+    function render() {
+      listEl.innerHTML = '';
+      const orderMap = { 'Başladı': 0, 'Atama Bekliyor': 1, 'Tamamlandı': 2 };
+      const sorted = tasks.slice().sort((a, b) => orderMap[a.status] - orderMap[b.status]);
+      sorted.forEach((t, i) => {
+        const row = document.createElement('tr');
+        if (t.status === 'Başladı') row.classList.add('started');
+        if (t.status === 'Tamamlandı') row.classList.add('completed');
+        const nameOptions = members.map(m => `<option value="${m}" ${t.name===m?'selected':''}>${m}</option>`).join('');
+        row.innerHTML = `
+          <td>${i+1}</td>
+          <td><select class="name-edit">${nameOptions}</select></td>
+          <td>${t.task}</td>
+          <td>
+            <select class="status-edit">
+              <option value="Atama Bekliyor" ${t.status==='Atama Bekliyor'?'selected':''}>Atama Bekliyor</option>
+              <option value="Başladı" ${t.status==='Başladı'?'selected':''}>Başladı</option>
+              <option value="Tamamlandı" ${t.status==='Tamamlandı'?'selected':''}>Tamamlandı</option>
+            </select>
+          </td>
+          <td><button class="confirm-btn">Onayla</button></td>
+          <td><button class="delete-btn">Sil</button></td>
+        `;
+        row.querySelector('.name-edit').addEventListener('change', e => updateTask(t, 'name', e.target.value));
+        row.querySelector('.status-edit').addEventListener('change', e => updateTask(t, 'status', e.target.value));
+        row.querySelector('.delete-btn').addEventListener('click', () => deleteTask(t));
+        row.querySelector('.confirm-btn').addEventListener('click', async () => {
+          const to = emails[t.name];
+          const subject = 'Yeni Görev Atamanız';
+          const body = `Merhaba ${t.name},\n\nSana yeni bir görev atandı: ${t.task}.`;
+          await sendEmail(to, subject, body);
+          updateTask(t, 'status', 'Başladı');
+        });
+        listEl.appendChild(row);
+      });
+    }
+    function updateTask(obj, key, val) { const idx = tasks.findIndex(t => t === obj); if (idx > -1) { tasks[idx][key] = val; save(); render(); }}
+    function deleteTask(obj) { tasks = tasks.filter(t => t !== obj); save(); render(); }
+    form.addEventListener('submit', e => { e.preventDefault(); const name = nameSelect.value, task = taskInput.value.trim(); if (!name || !task) return; tasks.push({ name, task, status: 'Atama Bekliyor' }); nameSelect.value = ''; taskInput.value = ''; save(); render(); });
+    exportBtn.addEventListener('click', () => { const dataStr = JSON.stringify(tasks, null, 2), blob = new Blob([dataStr], { type: 'application/json' }), url = URL.createObjectURL(blob), a = document.createElement('a'); a.href = url; a.download = 'tasks.json'; a.click(); URL.revokeObjectURL(url); });
+    importFile.addEventListener('change', e => { const file = e.target.files[0]; if (!file) return; const reader = new FileReader(); reader.onload = () => { try { tasks = JSON.parse(reader.result); save(); render(); } catch { alert('Geçersiz JSON dosyası'); } }; reader.readAsText(file); });
+    renderMemberButtons(); render();
+  </script>
+</body>
+</html>
